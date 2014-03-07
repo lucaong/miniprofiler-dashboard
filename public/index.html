@@ -4,61 +4,8 @@
     <title>Profiler</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <style type="text/css">
-      body {
-        padding-top: 20px;
-        padding-bottom: 40px;
-      }
-
-      .container {
-        max-width: 1000px;
-      }
-      .main {
-        margin-top: 40px;
-      }
-      .main > hr {
-        margin: 30px 0;
-      }
-
-      .new-profiling h3 {
-        margin: 0;
-      }
-
-      .pr-overview td.pr-depth-1:before { content: "\2043"; padding: 0 0.5em 0 1em }
-      .pr-overview td.pr-depth-2:before { content: "\2043"; padding: 0 0.5em 0 2em }
-      .pr-overview td.pr-depth-3:before { content: "\2043"; padding: 0 0.5em 0 3em }
-      .pr-overview td.pr-depth-4:before { content: "\2043"; padding: 0 0.5em 0 4em }
-      .pr-overview td.pr-depth-5:before { content: "\2043"; padding: 0 0.5em 0 5em }
-      .pr-overview td.pr-depth-6:before { content: "\2043"; padding: 0 0.5em 0 6em }
-      .pr-overview td.pr-depth-7:before { content: "\2043"; padding: 0 0.5em 0 7em }
-      .pr-overview td {
-        max-width: 400px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-      }
-
-      .pr-sql-timings th {
-        white-space: nowrap;
-      }
-      .pr-sql-timings pre {
-        font-size: 12px;
-      }
-
-      .stats details summary {
-        font-size: 12px;
-        color: #999;
-        cursor: pointer;
-        outline: none;
-      }
-
-      /* We do not need profiler results for the report, as it might be confusing */
-      .profiler-results {
-        display: none;
-      }
-    </style>
-
     <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="css/profiler.css" rel="stylesheet" media="screen">
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top">
@@ -107,6 +54,18 @@
               </tr>
             </thead>
             <tbody>
+              <script type="text/template" id="overview_row_tmpl">
+                <tr>
+                  <td class='pr-depth-{{ depth }}'>{{ name }}</td>
+                  <td>{{ duration }}ms</td>
+                  <td>{{ percent }}%</td>
+                  <td>+{{ start }}ms</td>
+                  <td>
+                    <span class='badge badge-info'>{{ numSQL }}</span>
+                    {{ sqlDuration }}ms
+                  </td>
+                </tr>
+              </script>
             </tbody>
           </table>
         </section>
@@ -125,6 +84,18 @@
             </tr>
           </thead>
           <tbody>
+            <script type="text/template" id="sql_row_tmpl">
+              <tr>
+                <td>
+                  <pre>{{ sql }}</pre>
+                  <details><summary>Stack trace</summary><pre>
+                  {{ stack }}</pre></details></td>
+                </td>
+                <td>{{ duration }}ms</td>
+                <td>{{ percent }}%</td>
+                <td>+{{ start }}ms</td>
+              </tr>
+            </script>
           </tbody>
         </table>
       </div>
@@ -132,72 +103,7 @@
     </div> <!-- /main -->
 
     <script src="http://code.jquery.com/jquery.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script>
-      $(".pr-request-form").submit( function( evt ) {
-        evt.preventDefault()
-        var path = $("#req-path").val() || "/"
-        var type = $("#req-method").val() || "GET"
-        var data = $("#req-data").val()
-
-        $.ajax( path, { type: type, data: data } )
-          .done(function( res, status, xhr ) {
-            var ids = JSON.parse( xhr.getResponseHeader("X-Miniprofiler-Ids") );
-            if ( ids && ids.length ) {
-              window.location = location.pathname + "?id=" + ids[0]
-            }
-          })
-          .fail(function( _, __, error ) { alert( "Request failed with: " + error ) })
-      })
-
-      if ( /\?.*id=/.test( location.search ) ) {
-        $("body").animate({ scrollTop: 120 })
-
-        var url = "/mini-profiler-resources/results" + location.search
-
-        $.get( url ).done(function( result ) {
-          console.log( result )
-
-          var root = result.Root
-
-          $("title").text( "Profiler - " + result.Name )
-
-          var totalDuration = root.DurationMilliseconds;
-
-          var renderProfile = function( steps ) {
-            steps.map( function( step ) {
-              $(".pr-overview tbody").append("<tr><td class='pr-depth-" +
-                  step.Depth + "'>" +
-                  step.Name + "</td><td>" +
-                  step.DurationMilliseconds.toFixed(2) + "ms</td><td>" +
-                  (step.DurationMilliseconds / totalDuration * 100).toFixed(2) + "%</td><td>+" +
-                  step.StartMilliseconds.toFixed(2) + "ms</td><td><span class='badge badge-info'>" +
-                  step.SqlTimings.length + "</span> " +
-                  step.SqlTimingsDurationMilliseconds.toFixed(2) + "ms</td></tr>")
-
-              step.SqlTimings.map( function(sql) {
-                $(".pr-sql-timings tbody").append("<tr><td><pre>" +
-                  sql.FormattedCommandString + "</pre>" +
-                  "<details><summary>Stack trace</summary><pre>" +
-                  sql.StackTraceSnippet + "</pre></details></td><td>" +
-                  sql.DurationMilliseconds.toFixed(2) + "ms</td><td>" +
-                  (sql.DurationMilliseconds / totalDuration * 100).toFixed(2) + "%</td><td>+" +
-                  sql.StartMilliseconds.toFixed(2) + "ms</td></tr>")
-              })
-
-              if ( step.Children && step.Children.length ) {
-                renderProfile( step.Children )
-              }
-            })
-          }
-
-          renderProfile([ root ])
-        })
-      } else {
-        $(".stats").hide()
-      }
-
-    </script>
+    <script src="js/profiler.js"></script>
   </body>
 </html>
 
