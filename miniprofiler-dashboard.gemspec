@@ -6,6 +6,7 @@ require 'rack/miniprofiler/dashboard/version'
 
 Gem::Specification.new do |gem|
   gem.name          = "miniprofiler-dashboard"
+  gem.authors       = ["Luca Ongaro"]
   gem.version       = Rack::MiniProfiler::Dashboard::VERSION
   gem.description   = "A dashboard for MiniProfiler"
   gem.summary       = <<-DESC
