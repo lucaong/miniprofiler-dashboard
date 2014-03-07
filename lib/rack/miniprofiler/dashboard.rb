@@ -1,5 +1,5 @@
 module Rack
-  module MiniProfiler
+  class MiniProfiler
     class Dashboard < Rack::Static
       def initialize
         super( urls: [""], root: "public", index: "index.html" )
