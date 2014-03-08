@@ -16,12 +16,14 @@ In your `config.ru`:
 require 'rack-mini-profiler'
 require 'rack/miniprofiler/dashboard'
 
+use Rack::MiniProfiler
+
 map '/profiler' do
   use Rack::MiniProfiler::Dashboard
 end
 ```
 
-Then start the app and visit `/profiler`.
+Then start the app and visit `/profiler/index.html`.
 
 # TODO
 
