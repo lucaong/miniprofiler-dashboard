@@ -1,7 +1,7 @@
 module Rack
   class MiniProfiler
     class Dashboard
-      VERSION = "0.0.1"
+      VERSION = "0.0.2"
     end
   end
 end
