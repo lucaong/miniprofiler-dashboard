@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    miniprofiler-dashboard (0.0.1)
+    miniprofiler-dashboard (0.0.2)
       rack
       rack-mini-profiler
 
