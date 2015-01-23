@@ -1,3 +1,4 @@
+require 'rack/miniprofiler/dashboard'
 module Rack
   class MiniProfiler
     class Dashboard
